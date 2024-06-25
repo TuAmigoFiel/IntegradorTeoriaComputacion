@@ -1,0 +1,57 @@
+package analizadorlexico;
+
+import java_cup.runtime.*;
+
+terminal PROGRAMA, VARIABLES, FUNCION, INICIO, SI, ENTONCES, SINO, FIN, ENTERO, LEER, ESCRIBIR;
+terminal LPAREN, RPAREN, COMMA, SEMICOLON, ASSIGN, COLON;
+terminal NUMBER, IDENTIFIER;
+
+non terminal program, decls, decl, stmts, stmt, expr, term, factor;
+
+start with program;
+
+program ::= PROGRAMA IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN SEMICOLON decls;
+
+decls ::= VARIABLES decl SEMICOLON decls
+        | decl SEMICOLON decls
+        | decl SEMICOLON
+        | ;
+
+decl ::= IDENTIFIER COLON ENTERO
+       | FUNCION IDENTIFIER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN COLON ENTERO stmts;
+
+stmts ::= stmt stmts
+        | stmt;
+
+stmt ::= IDENTIFIER ASSIGN expr SEMICOLON
+       | SI expr ENTONCES stmts SINO stmts FIN SEMICOLON
+       | LEER LPAREN IDENTIFIER COMMA IDENTIFIER RPAREN SEMICOLON
+       | ESCRIBIR LPAREN expr RPAREN SEMICOLON;
+
+expr ::= term
+       | term '+' term
+       | term '-' term;
+
+term ::= factor
+       | factor '*' factor
+       | factor '/' factor;
+
+factor ::= IDENTIFIER
+         | NUMBER
+         | LPAREN expr RPAREN;
+
+%%
+
+/* Código auxiliar Java */
+public class parser {
+  public static void main(String[] args) throws Exception {
+    Lexer lexer = new Lexer(new java.io.FileReader(args[0]));
+    parser parser = new parser(lexer);
+    parser.parse();
+  }
+
+  public static void yyerror(String s) {
+    System.err.println("Error: " + s);
+  }
+}
+
